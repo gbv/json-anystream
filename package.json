@@ -1,0 +1,19 @@
+{
+  "name": "json-anystream",
+  "version": "0.0.1",
+  "description": "Stream JSON objects no matter what the source is.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gbv/json-anystream.git"
+  },
+  "author": "Stefan Peters",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/gbv/json-anystream/issues"
+  },
+  "homepage": "https://github.com/gbv/json-anystream#readme"
+}
