@@ -34,7 +34,6 @@ describe("convert", () => {
         let index = 0
         const inputStream = Readable.from(testString)
         const stream = convert(inputStream, ndjson ? "ndjson" : "json")
-        inputStream.pause()
         stream.then((stream) => {
           stream.on("data", object => {
             if (isObject) {
@@ -57,7 +56,6 @@ describe("convert", () => {
             }
             done()
           })
-          inputStream.resume()
         })
       })
     }

@@ -9,6 +9,28 @@ const http = require("http")
 const https = require("https")
 
 /**
+ * This is a workaround for the case that we only attach data handlers on the next tick, which would cause the stream to continue and we'd lose events.
+ *
+ * If this is wrapped around a stream and its piped result, it will wait until another handler is attached to the piped result.
+ *
+ * Usage: `let newStream = waitForNextHandler(stream, stream.pipe(someTransform)); await someAsyncThing(); newStream.on("data", dataHandler)`
+ *
+ * @param {stream} originalStream original Readable stream
+ * @param {stream} newStream new stream after piping into Transfors
+ */
+function waitForNextHandler(originalStream, newStream) {
+  originalStream.pause()
+  const superOn = newStream.on
+  newStream.on = function (eventName) {
+    if (eventName === "data") {
+      originalStream.resume()
+    }
+    superOn.apply(this, arguments)
+  }
+  return newStream
+}
+
+/**
  * Function that converts an existing stream to a JSON element stream.
  *
  * The resulting stream will emit single elements (usually objects, but can be other types if the input was a JSON array) via the `data` event.
@@ -30,9 +52,9 @@ async function convert(stream, type) {
           // Only use fieldname `data`
           if (fieldname == "data") {
             if (filename.endsWith(".ndjson")) {
-              resolve(file.pipe(ndjson.parse()))
+              resolve(waitForNextHandler(file, file.pipe(ndjson.parse())))
             } else if (filename.endsWith(".json")) {
-              resolve(file.pipe(parser()).pipe(new StreamAnyObject()))
+              resolve(waitForNextHandler(file, file.pipe(parser()).pipe(new StreamAnyObject())))
             } else {
               file.resume()
             }
@@ -47,10 +69,10 @@ async function convert(stream, type) {
       })
     case "json":
       // Handle JSON via stream-json and custom streamer above
-      return stream.pipe(parser()).pipe(new StreamAnyObject())
+      return waitForNextHandler(stream, stream.pipe(parser()).pipe(new StreamAnyObject()))
     case "ndjson":
       // Handle NDJSON via ndjson module
-      return stream.pipe(ndjson.parse())
+      return waitForNextHandler(stream, stream.pipe(ndjson.parse()))
     default:
       throw new Error("convert: type argument has to be one of multipart, json, ndjson")
   }
