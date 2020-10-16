@@ -4,12 +4,14 @@
 
 const assert = require("assert")
 
-const { convert } = require("../../src/anystream")
+const { make, convert } = require("../../src/anystream")
 
 // Use stream.Readable to create streams from JSON objects
 const { Readable } = require("stream")
 
 const FormData = require("form-data")
+const nock = require("nock")
+const fs = require("fs")
 
 describe("convert", () => {
 
@@ -93,5 +95,66 @@ describe("convert", () => {
 })
 
 describe("make", () => {
-  // For make, test input as URL or file only
+
+  const hostname = "http://example.com"
+  const path = "/"
+  const url = `${hostname}${path}`
+
+  for (let ndjson of [false, true]) {
+    for (let data of [
+      { a: 1 },
+      [
+        { a: 1 },
+      ],
+    ]) {
+      const isArray = Array.isArray(data)
+      if (!isArray && ndjson) {
+        continue
+      }
+      it("should pass test for URL", async () => {
+        const dataAsString = ndjson ? data.map(o => JSON.stringify(o)).join("\n") : JSON.stringify(data)
+        const scope = nock(hostname)
+          .get(path)
+          .reply(200, dataAsString, {
+            "Content-Type": `application/${ndjson ? "x-ndjson" : "json"}`,
+          })
+        let index = 0
+        const stream = await make(url)
+        for await (let object of stream) {
+          if (isArray) {
+            assert.deepStrictEqual(object, data[index])
+          } else {
+            assert(index == 0)
+            assert.deepStrictEqual(object, data)
+          }
+          index += 1
+        }
+        assert(scope.isDone())
+      })
+
+    }
+  }
+
+  it("should read JSON from file", async () => {
+    const file = __dirname + "/test.json"
+    const stream = await make(file)
+    const data = JSON.parse(fs.readFileSync(file, "utf-8"))
+    let index = 0
+    for await (let object of stream) {
+      assert.deepStrictEqual(object, data[index])
+      index += 1
+    }
+  })
+
+  it("should read NDJSON from file", async () => {
+    const file = __dirname + "/test.ndjson"
+    const stream = await make(file)
+    const data = fs.readFileSync(file, "utf-8").split("\n").filter(o => o).map(o => JSON.parse(o))
+    let index = 0
+    for await (let object of stream) {
+      assert.deepStrictEqual(object, data[index])
+      index += 1
+    }
+  })
+
 })
