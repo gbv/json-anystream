@@ -4,29 +4,30 @@
 [![GitHub package version](https://img.shields.io/github/package-json/v/gbv/json-anystream.svg?label=version)](https://github.com/gbv/json-anystream)
 [![standard-readme compliant](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg)](https://github.com/RichardLitt/standard-readme)
 
-> Takes any stream that provides JSON objects (single object or array of objects) or NDJSON data (objects) and turns it into a stream that emits single JSON objects.
+> Takes any stream that provides JSON objects (array of objects or single object) or newline delimited JSON objects (NDJSON) and turns it into a JSON objects emitting stream.
 
-Features:
-- Supports JSON objects, JSON arrays of objects, NDJSON, as well as mutlipart/form-data with a file containing one of those.
-- The resulting stream emits only single JSON objects via the `data` event.
-- Supports reading from local files (using `fs`). Content type is determined via file ending.
-- Supports reading from URLs (using `http`/`https`). Content type is determined via Content-Type header or file ending.
-- Provides an express middleware that wraps the above functionality and adds the stream as `res.anystream`.
+This module is motivated by a need to read a set of JSON objects, which can be given in different forms. The module
 
-**Table of Contents**
-- [json-anystream](#json-anystream)
-  - [Install](#install)
-  - [Usage](#usage)
-    - [Import](#import)
-    - [`anystream.make`](#anystreammake)
-    - [`anystream.convert`](#anystreamconvert)
-    - [`anystream.StreamAnyObject`](#anystreamstreamanyobject)
-    - [`anystream.addStream`](#anystreamaddstream)
-  - [Errors](#errors)
-  - [Maintainers](#maintainers)
-  - [Publish](#publish)
-  - [Contribute](#contribute)
-  - [License](#license)
+- provide a stream that emits single JSON objects via the `data` event.
+- supports JSON objects, JSON arrays of objects, NDJSON, as well as mutlipart/form-data with a file containing one of those.
+- supports reading from local files (using `fs`). Content type is determined via file ending.
+- supports reading from URLs (using `http`/`https`). Content type is determined via Content-Type header or file ending.
+- provides an express middleware that wraps the above functionality and adds the stream as `res.anystream`.
+
+## Table of Contents
+
+- [Install](#install)
+- [Usage](#usage)
+  - [Import](#import)
+  - [`anystream.make`](#anystreammake)
+  - [`anystream.convert`](#anystreamconvert)
+  - [`anystream.StreamAnyObject`](#anystreamstreamanyobject)
+  - [`anystream.addStream`](#anystreamaddstream)
+- [Errors](#errors)
+- [Maintainers](#maintainers)
+- [Publish](#publish)
+- [Contribute](#contribute)
+- [License](#license)
 
 ## Install
 ```bash
