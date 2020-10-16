@@ -23,7 +23,8 @@ function waitForNextHandler(originalStream, newStream) {
   originalStream.pause()
   const superOn = newStream.on
   newStream.on = function (eventName) {
-    if (eventName === "data") {
+    // Support for data (.on("data", ...)) and read (e.g. for async (let data of stream) { ... })
+    if (["data", "readable"].includes(eventName)) {
       originalStream.resume()
     }
     superOn.apply(this, arguments)
