@@ -6,36 +6,12 @@ const { parser } = require("stream-json")
 // Use stream.Readable to create streams from JSON objects
 const { Readable } = require("stream")
 
-const tests = [
-  {
-    a: 1,
-  },
-  {
-    with: {
-      deep: {
-        property: 2,
-      },
-    },
-  },
-  [
-    {
-      a: 1,
-    },
-    {
-      a: 2,
-    },
-  ],
-  null,
-  "test",
-  false,
-  2,
-]
+const tests = require("./test-cases.json")
 
 describe("StreamAnyObject", () => {
 
   for (let test of tests) {
-    const isObject = !Array.isArray(test)
-    const expectError = typeof test !== "object" || !test
+    const isArray = Array.isArray(test)
     const testString = JSON.stringify(test)
     it("should pass test for " + testString, (done) => {
       let hasReceivedIsSingleObject = false
@@ -43,15 +19,16 @@ describe("StreamAnyObject", () => {
       const inputStream = Readable.from(testString)
       const stream = inputStream.pipe(parser()).pipe(new StreamAnyObject())
       stream.on("data", object => {
-        if (isObject) {
-          assert.deepStrictEqual(object, test)
-        } else {
+        if (isArray) {
           assert.deepStrictEqual(object, test[index])
           index += 1
+        } else {
+          assert.deepStrictEqual(object, test)
         }
       })
       stream.on("error", () => {
-        if (expectError) {
+        const toCheck = isArray ? test[index] : test
+        if (typeof toCheck !== "object" || !toCheck) {
           done()
         } else {
           assert.fail("got error when none was expected")
@@ -61,8 +38,8 @@ describe("StreamAnyObject", () => {
         hasReceivedIsSingleObject = true
       })
       stream.on("end", () => {
-        assert.strictEqual(hasReceivedIsSingleObject, isObject)
-        if (!isObject) {
+        assert.strictEqual(hasReceivedIsSingleObject, !isArray)
+        if (isArray) {
           assert.strictEqual(index, test.length)
         }
         done()

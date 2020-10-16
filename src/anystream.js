@@ -2,6 +2,7 @@ const Busboy = require("busboy")
 const ndjson = require("ndjson")
 const { parser } = require("stream-json")
 const StreamAnyObject = require("./StreamAnyObject")
+const ObjectFilterTransform = require("./ObjectFilterTransform")
 // Used for reading files
 const fs = require("fs")
 // Used for consuming URLs
@@ -52,7 +53,7 @@ async function convert(stream, type) {
           // Only use fieldname `data`
           if (fieldname == "data") {
             if (filename.endsWith(".ndjson")) {
-              resolve(waitForNextHandler(file, file.pipe(ndjson.parse())))
+              resolve(waitForNextHandler(file, file.pipe(ndjson.parse()).pipe(new ObjectFilterTransform())))
             } else if (filename.endsWith(".json")) {
               resolve(waitForNextHandler(file, file.pipe(parser()).pipe(new StreamAnyObject())))
             } else {
@@ -72,7 +73,7 @@ async function convert(stream, type) {
       return waitForNextHandler(stream, stream.pipe(parser()).pipe(new StreamAnyObject()))
     case "ndjson":
       // Handle NDJSON via ndjson module
-      return waitForNextHandler(stream, stream.pipe(ndjson.parse()))
+      return waitForNextHandler(stream, stream.pipe(ndjson.parse()).pipe(new ObjectFilterTransform()))
     default:
       throw new Error("convert: type argument has to be one of multipart, json, ndjson")
   }

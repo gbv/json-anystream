@@ -47,7 +47,12 @@ module.exports = class StreamAnyObject extends require("stream-json/streamers/St
           this._assembler.current.pop()
         } else {
           // Push array values directly
-          this.push(this._assembler.current.pop())
+          const value = this._assembler.current.pop()
+          if (value && typeof value === "object") {
+            this.push(value)
+          } else {
+            this.emit("error", new Error(`Unexpected non-object: ${value}`))
+          }
         }
       }
     }

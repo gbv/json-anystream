@@ -10,22 +10,12 @@ const { convert } = require("../../src/anystream")
 const { Readable } = require("stream")
 
 describe("convert", () => {
-  // Note that when we're using Readable and we don't immediately attach event handlers (which we can't because `convert` returns a Promise), we are getting undefined behavior. To work around this, we pause after calling `convert` and then resume after we attached the event handlers.
-  const tests = [
-    { object: true },
-    [
-      { arrayWithOne: "object" },
-    ],
-    [
-      { array: 1 },
-      { of: "1" },
-      { objects: null },
-    ],
-  ]
+
+  const tests = require("./test-cases.json")
   for (let ndjson of [false, true]) {
     for (let test of tests) {
-      const isObject = !Array.isArray(test)
-      if (isObject && ndjson) {
+      const isArray = Array.isArray(test)
+      if (!isArray && ndjson) {
         continue
       }
       const testString = ndjson ? test.map(object => JSON.stringify(object)).join("\n") : JSON.stringify(test)
@@ -36,22 +26,28 @@ describe("convert", () => {
         const stream = convert(inputStream, ndjson ? "ndjson" : "json")
         stream.then((stream) => {
           stream.on("data", object => {
-            if (isObject) {
-              assert.deepStrictEqual(object, test)
-            } else {
+            if (isArray) {
               assert.deepStrictEqual(object, test[index])
               index += 1
+            } else {
+              assert.deepStrictEqual(object, test)
             }
           })
           stream.on("error", () => {
-            assert.fail("got error when none was expected")
+            const toCheck = isArray ? test[index] : test
+            if (typeof toCheck !== "object" || !toCheck) {
+              done()
+            } else {
+              assert.fail("got error when none was expected")
+            }
           })
           stream.on("isSingleObject", () => {
             hasReceivedIsSingleObject = true
           })
           stream.on("end", () => {
-            assert.strictEqual(hasReceivedIsSingleObject, isObject)
-            if (!isObject) {
+            assert.strictEqual(hasReceivedIsSingleObject, !isArray)
+            // Note: For ndjson, a `null` value simply stops the stream
+            if (isArray && (!ndjson || !test.includes(null))) {
               assert.strictEqual(index, test.length)
             }
             done()
