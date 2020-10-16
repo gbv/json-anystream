@@ -3,6 +3,9 @@
   "version": "0.0.1",
   "description": "Stream JSON objects no matter what the source is.",
   "main": "index.js",
+  "files": [
+    "src"
+  ],
   "scripts": {
     "test": "mocha --recursive",
     "lint": "eslint ./**/*.js ./**/.*.js",
