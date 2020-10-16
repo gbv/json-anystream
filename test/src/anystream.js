@@ -26,7 +26,14 @@ describe("convert", () => {
         it(`should pass test for ${testString} ${ndjson ? "(ndjson)" : ""}${multipart ? "(form-data)" : ""}`, (done) => {
           let hasReceivedIsSingleObject = false
           let index = 0
-          let inputStream = Readable.from(testString)
+          let inputStream
+          if (testString) {
+            inputStream = Readable.from(testString)
+          } else {
+            // Node.js 10: Create an empty stream and end it immediately
+            inputStream = new Readable({ read() { } })
+            inputStream.push(null)
+          }
           if (multipart) {
             const form = new FormData()
             form.append("data", inputStream, {
