@@ -12,6 +12,7 @@ const { Readable } = require("stream")
 const FormData = require("form-data")
 const nock = require("nock")
 const fs = require("fs")
+const errors = require("../../src/errors")
 
 describe("convert", () => {
 
@@ -55,9 +56,10 @@ describe("convert", () => {
                 assert.deepStrictEqual(object, test)
               }
             })
-            stream.on("error", () => {
+            stream.on("error", (error) => {
               const toCheck = isArray ? test[index] : test
               if (typeof toCheck !== "object" || !toCheck) {
+                assert(error instanceof errors.UnexpectedNonObjectValueError)
                 done()
               } else {
                 assert.fail("got error when none was expected")
@@ -87,6 +89,7 @@ describe("convert", () => {
     try {
       stream = await convert(form, "multipart")
     } catch (error) {
+      assert(error instanceof errors.InvalidOrMissingDataFieldError)
       stream = null
     }
     stream && assert.fail("expected stream conversion to fail")

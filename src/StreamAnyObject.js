@@ -1,3 +1,5 @@
+const errors = require("./errors")
+
 /**
  * Streamer for stream-json that streams objects or arrays.
  * - If it's an object: Only a single value (the full assembled object) will be emitted.
@@ -20,7 +22,7 @@ module.exports = class StreamAnyObject extends require("stream-json/streamers/St
     } else if (chunk.name === "startArray") {
       this._counter = 0
     } else {
-      return callback(new Error("Top-level object should be an array or object."))
+      return callback(new errors.UnexpectedNonObjectValueError())
     }
     this._transform = this._filter
     return this._transform(chunk, _, callback)
@@ -51,7 +53,7 @@ module.exports = class StreamAnyObject extends require("stream-json/streamers/St
           if (value && typeof value === "object") {
             this.push(value)
           } else {
-            this.emit("error", new Error(`Unexpected non-object: ${value}`))
+            this.emit("error", new errors.UnexpectedNonObjectValueError())
           }
         }
       }

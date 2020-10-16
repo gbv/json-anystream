@@ -7,6 +7,7 @@ const { parser } = require("stream-json")
 const { Readable } = require("stream")
 
 const tests = require("./test-cases.json")
+const errors = require("../../src/errors")
 
 describe("StreamAnyObject", () => {
 
@@ -26,9 +27,10 @@ describe("StreamAnyObject", () => {
           assert.deepStrictEqual(object, test)
         }
       })
-      stream.on("error", () => {
+      stream.on("error", (error) => {
         const toCheck = isArray ? test[index] : test
         if (typeof toCheck !== "object" || !toCheck) {
+          assert(error instanceof errors.UnexpectedNonObjectValueError)
           done()
         } else {
           assert.fail("got error when none was expected")

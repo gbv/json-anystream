@@ -1,4 +1,5 @@
 const { Transform } = require("stream")
+const errors = require("./errors")
 
 module.exports = class ObjectFilterTransform extends Transform {
   constructor(options = {}) {
@@ -9,7 +10,7 @@ module.exports = class ObjectFilterTransform extends Transform {
     if (value && typeof value === "object") {
       this.push(value)
     } else {
-      this.emit("error", new Error(`Unexpected non-object: ${value}`))
+      this.emit("error", new errors.UnexpectedNonObjectValueError())
     }
     callback()
   }

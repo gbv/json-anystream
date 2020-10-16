@@ -3,6 +3,7 @@ const ndjson = require("ndjson")
 const { parser } = require("stream-json")
 const StreamAnyObject = require("./StreamAnyObject")
 const ObjectFilterTransform = require("./ObjectFilterTransform")
+const errors = require("./errors")
 // Used for reading files
 const fs = require("fs")
 // Used for consuming URLs
@@ -59,13 +60,14 @@ async function convert(stream, type) {
               resolve(waitForNextHandler(file, file.pipe(parser()).pipe(new StreamAnyObject())))
             } else {
               file.resume()
+              reject(new errors.InvalidOrMissingDataFieldError("multipart/form-data requires a file in field `data` with a file ending of either .json or .ndjson."))
             }
           } else {
             file.resume()
           }
         })
         busboy.on("finish", function () {
-          reject("Expected json or ndjson file via field name `data`, could not be found.")
+          reject(new errors.InvalidOrMissingDataFieldError("multipart/form-data requires a file in field `data`"))
         })
         stream.pipe(busboy)
       })
@@ -76,7 +78,7 @@ async function convert(stream, type) {
       // Handle NDJSON via ndjson module
       return waitForNextHandler(stream, stream.pipe(ndjson.parse()).pipe(new ObjectFilterTransform()))
     default:
-      throw new Error("convert: type argument has to be one of multipart, json, ndjson")
+      throw new errors.MissingTypeError()
   }
 }
 
@@ -97,9 +99,15 @@ async function make(input, type) {
     if (input.startsWith("http://") || input.startsWith("https://")) {
       const isHttps = input.startsWith("https://")
       // Handle input as URL
-      return (new Promise((resolve) => {
+      return (new Promise((resolve, reject) => {
         (isHttps ? https : http).get(input, (res) => {
-          // TODO: Check status code
+          // Check status code
+          if (res.statusCode !== 200) {
+            const error = new errors.UrlRequestError(`Requesting data from URL ${input} failed; status code ${res.statusCode}`)
+            error.statusCode = res.statusCode
+            reject(errors)
+            return
+          }
           // Check content type and adjust `type` if possible
           const contentType = res.headers["content-type"]
           if (/^application\/json/.test(contentType)) {
