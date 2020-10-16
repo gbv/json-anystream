@@ -24,6 +24,7 @@ Features:
     - [`anystream.addStream`](#anystreamaddstream)
   - [Errors](#errors)
   - [Maintainers](#maintainers)
+  - [Publish](#publish)
   - [Contribute](#contribute)
   - [License](#license)
 
@@ -130,6 +131,19 @@ app.use((req, res, next) => {
 
 ## Maintainers
 - [@stefandesu](https://github.com/stefandesu)
+
+## Publish
+To publish a new version on npm after committing your changes, make sure you committed/merged all your changes to `main` successfully and then run:
+
+```bash
+npm run release:patch
+# or for minor release:
+# npm run release:minor
+# or for major release:
+# npm run release:major
+```
+
+A new version will be published to npm automatically via GitHub Actions.
 
 ## Contribute
 PRs accepted. Please make sure the tests complete with your change. Add new tests if applicable.
