@@ -9,7 +9,11 @@
   "scripts": {
     "test": "mocha --recursive",
     "lint": "eslint ./**/*.js ./**/.*.js",
-    "fix": "eslint --fix ./**/*.js ./**/.*.js"
+    "fix": "eslint --fix ./**/*.js ./**/.*.js",
+    "release": "npm test && npm version $SEMVER && git push --follow-tags",
+    "release:patch": "SEMVER=patch npm run release",
+    "release:minor": "SEMVER=minor npm run release",
+    "release:major": "SEMVER=major npm run release"
   },
   "pre-commit": [
     "test"
