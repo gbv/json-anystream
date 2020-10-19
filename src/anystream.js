@@ -28,7 +28,7 @@ function waitForNextHandler(originalStream, newStream) {
     if (["data", "readable"].includes(eventName)) {
       originalStream.resume()
     }
-    superOn.apply(this, arguments)
+    return superOn.apply(this, arguments)
   }
   return newStream
 }
