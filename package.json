@@ -1,6 +1,6 @@
 {
   "name": "json-anystream",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Stream JSON objects no matter what the source is.",
   "main": "index.js",
   "files": [
