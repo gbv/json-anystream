@@ -105,7 +105,7 @@ async function make(input, type) {
           if (res.statusCode !== 200) {
             const error = new errors.UrlRequestError(`Requesting data from URL ${input} failed; status code ${res.statusCode}`)
             error.statusCode = res.statusCode
-            reject(errors)
+            reject(error)
             return
           }
           // Check content type and adjust `type` if possible
