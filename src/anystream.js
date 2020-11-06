@@ -43,8 +43,9 @@ function waitForNextHandler(originalStream, newStream) {
  *
  * @param {stream} stream existing stream object
  * @param {string} type one of multipart, json, ndjson
+ * @param {Function} adjust optional adjustment method through which all objects are adjusted
  */
-async function convert(stream, type) {
+async function convert(stream, type, adjust) {
   switch (type) {
     case "multipart":
       // Handle multipart stream via busboy
@@ -55,9 +56,9 @@ async function convert(stream, type) {
           // Only use fieldname `data`
           if (fieldname == "data") {
             if (filename.endsWith(".ndjson")) {
-              resolve(waitForNextHandler(file, file.pipe(ndjson.parse()).pipe(new ObjectFilterTransform())))
+              resolve(waitForNextHandler(file, file.pipe(ndjson.parse()).pipe(new ObjectFilterTransform({ adjust }))))
             } else if (filename.endsWith(".json")) {
-              resolve(waitForNextHandler(file, file.pipe(parser()).pipe(new StreamAnyObject())))
+              resolve(waitForNextHandler(file, file.pipe(parser()).pipe(new StreamAnyObject({ adjust }))))
             } else {
               file.resume()
               reject(new errors.InvalidOrMissingDataFieldError("multipart/form-data requires a file in field `data` with a file ending of either .json or .ndjson."))
@@ -73,10 +74,10 @@ async function convert(stream, type) {
       })
     case "json":
       // Handle JSON via stream-json and custom streamer above
-      return waitForNextHandler(stream, stream.pipe(parser()).pipe(new StreamAnyObject()))
+      return waitForNextHandler(stream, stream.pipe(parser()).pipe(new StreamAnyObject({ adjust })))
     case "ndjson":
       // Handle NDJSON via ndjson module
-      return waitForNextHandler(stream, stream.pipe(ndjson.parse()).pipe(new ObjectFilterTransform()))
+      return waitForNextHandler(stream, stream.pipe(ndjson.parse()).pipe(new ObjectFilterTransform({ adjust })))
     default:
       throw new errors.MissingTypeError()
   }
@@ -87,8 +88,9 @@ async function convert(stream, type) {
  *
  * @param {stream|string} input either an existing input stream supported by `convert`, or a string containing a file path or URL
  * @param {string} type optional type which is necessary for an input stream and might be necessary for URLs if they don't contain a file ending or content type
+ * @param {Function} adjust optional adjustment method through which all objects are adjusted
  */
-async function make(input, type) {
+async function make(input, type, adjust) {
   if (typeof input === "string") {
     if (input.endsWith(".json")) {
       type = type || "json"
@@ -116,15 +118,15 @@ async function make(input, type) {
           if (/^application\/x-ndjson/.test(contentType)) {
             type = "ndjson"
           }
-          resolve(convert(res, type))
+          resolve(convert(res, type, adjust))
         })
       }))
     } else {
       // Handle input as file
-      return convert(fs.createReadStream(input, "utf-8"), type)
+      return convert(fs.createReadStream(input, "utf-8"), type, adjust)
     }
   } else {
-    return convert(input, type)
+    return convert(input, type, adjust)
   }
 }
 

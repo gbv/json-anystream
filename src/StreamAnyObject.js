@@ -9,9 +9,10 @@ const errors = require("./errors")
  */
 module.exports = class StreamAnyObject extends require("stream-json/streamers/StreamBase") {
 
-  constructor(options) {
+  constructor({ adjust, ...options } = {}) {
     super(options)
     this._level = 1
+    this.adjust = adjust || (object => object)
   }
 
   _wait(chunk, _, callback) {
@@ -51,7 +52,7 @@ module.exports = class StreamAnyObject extends require("stream-json/streamers/St
           // Push array values directly
           const value = this._assembler.current.pop()
           if (value && typeof value === "object") {
-            this.push(value)
+            this.push(this.adjust(value))
           } else {
             this.emit("error", new errors.UnexpectedNonObjectValueError())
           }
@@ -63,7 +64,7 @@ module.exports = class StreamAnyObject extends require("stream-json/streamers/St
   _flush(callback) {
     // Push single object before end of stream
     this._object && this.emit("isSingleObject")
-    this._object && this.push(this._object)
+    this._object && this.push(this.adjust(this._object))
     callback()
   }
 }

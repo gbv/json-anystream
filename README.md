@@ -42,9 +42,9 @@ const anystream = require("json-anystream")
 ```
 
 ### `anystream.make`
-`async function make(input, type)`
+`async function make(input, type, adjust)`
 
-Takes an `input` (URL, file path, or existing stream) and makes a JSON object stream out of it. `type` can have one of the values "json", "ndjson", or "multipart", and is optional if the type can be inferred from the file ending or content type header.
+Takes an `input` (URL, file path, or existing stream) and makes a JSON object stream out of it. `type` can have one of the values "json", "ndjson", or "multipart", and is optional if the type can be inferred from the file ending or content type header. `adjust` is an optional adjustment method that is called for each object in the resulting stream before it is emitted.
 
 Example:
 ```json
@@ -71,12 +71,14 @@ for await (let object of stream) {
 For existing streams, `anystream.make` as simply a wrapper over `anystream.convert`. For URLs, `http.get` or `https.get` are used and the resulting stream is wrapped by `anystream.convert`. For files, `fs.createReadStream` is used and the resulting stream is wrapped by `anystream.convert`.
 
 ### `anystream.convert`
-`async function convert(stream, type)`
+`async function convert(stream, type, adjust)`
 
 Takes an existing stream and returns a JSON object stream. The `type` parameter is required and is determined by the data of the stream:
 - `json`: Any JSON stream (single object or array of object) that is compatible with [stream-json](https://www.npmjs.com/package/stream-json).
 - `ndjson`: Any stream of JSON objects compatible with [ndjson](https://www.npmjs.com/package/ndjson).
 - `multipart`: A request object containing `multipart/form-data` data that contains the field `data` with a compatible .json or .ndjson file ([busboy](https://www.npmjs.com/package/busboy) is used for parsing the form data).
+
+ `adjust` is an optional adjustment method that is called for each object in the resulting stream before it is emitted.
 
 ### `anystream.StreamAnyObject`
 A custom streamer for [stream-json](https://www.npmjs.com/package/stream-json) that takes a stream of either a single JSON object or an array of JSON objects and transforms it into a stream that emits only JSON objects. I.e. if the input stream contains a single JSON object, that object is assembled and then emitted as a whole, if the input stream contains an array of JSON objects, the objects are emitted as direct JSON objects.
@@ -99,6 +101,8 @@ pipeline.on("isSingleObject", () => {
 })
 ```
 
+The constructur takes an options objects that can optionally contain a `adjust` method that is called for each object in the resulting stream before it is emitted.
+
 ### `anystream.addStream`
 A middleware for [express](https://www.npmjs.com/package/express) that provides the result of `anystream.make` as `req.anystream`. The input can be one of the following:
 - A compatible data stream directly via POST data.
@@ -120,6 +124,14 @@ app.use((req, res, next) => {
     express.json()(req, res, next)
   }
 })
+```
+
+`anystream.addStream` can also be called with an adjustment method first which is then forwarded into `anystream.make` (see above):
+```js
+anystream.addStream(object => {
+  // Adjust object
+  return object
+})(req, res, next)
 ```
 
 ## Errors
