@@ -16,18 +16,20 @@ This module is motivated by a need to read a set of JSON objects, which can be g
 
 ## Table of Contents
 
-- [Install](#install)
-- [Usage](#usage)
-  - [Import](#import)
-  - [`anystream.make`](#anystreammake)
-  - [`anystream.convert`](#anystreamconvert)
-  - [`anystream.StreamAnyObject`](#anystreamstreamanyobject)
-  - [`anystream.addStream`](#anystreamaddstream)
-- [Errors](#errors)
-- [Maintainers](#maintainers)
-- [Publish](#publish)
-- [Contribute](#contribute)
-- [License](#license)
+- [json-anystream](#json-anystream)
+  - [Table of Contents](#table-of-contents)
+  - [Install](#install)
+  - [Usage](#usage)
+    - [Import](#import)
+    - [`anystream.make`](#anystreammake)
+    - [`anystream.convert`](#anystreamconvert)
+    - [`anystream.StreamAnyObject`](#anystreamstreamanyobject)
+    - [`anystream.addStream`](#anystreamaddstream)
+  - [Errors](#errors)
+  - [Maintainers](#maintainers)
+  - [Publish](#publish)
+  - [Contribute](#contribute)
+  - [License](#license)
 
 ## Install
 ```bash
@@ -47,7 +49,7 @@ const anystream = require("json-anystream")
 Takes an `input` (URL, file path, or existing stream) and makes a JSON object stream out of it. `type` can have one of the values "json", "ndjson", or "multipart", and is optional if the type can be inferred from the file ending or content type header. `adjust` is an optional adjustment method that is called for each object in the resulting stream before it is emitted.
 
 Example:
-```json
+```js
 const stream = await anystream.make("https://example.com/test.json")
 stream.on("data", object => {
   // object contains single JSON objects
@@ -61,7 +63,7 @@ stream.on("error", error => {
 ```
 
 You can also use for async:
-```json
+```js
 const stream = await anystream.make("https://example.com/api/test") // assuming content type header is set
 for await (let object of stream) {
   // object contains single JSON objects
@@ -83,7 +85,7 @@ Takes an existing stream and returns a JSON object stream. The `type` parameter 
 ### `anystream.StreamAnyObject`
 A custom streamer for [stream-json](https://www.npmjs.com/package/stream-json) that takes a stream of either a single JSON object or an array of JSON objects and transforms it into a stream that emits only JSON objects. I.e. if the input stream contains a single JSON object, that object is assembled and then emitted as a whole, if the input stream contains an array of JSON objects, the objects are emitted as direct JSON objects.
 
-```json
+```js
 const { parser } = require("stream-json")
 const pipeline = stream.pipe(parser()).pipe(new anystream.StreamAnyObject())
 pipeline.on("data", object => {
@@ -95,7 +97,7 @@ pipeline.on("end", () => {
 ```
 
 There is also a custom event in case the input was in fact a single JSON object:
-```json
+```js
 pipeline.on("isSingleObject", () => {
   // if this event is called, the input stream contained a single object and NOT an array of objects
 })
@@ -111,7 +113,7 @@ A middleware for [express](https://www.npmjs.com/package/express) that provides 
 
 An additional query parameter `type`, containing one of "multipart", "json", or "ndjson", may be provided if the type can't be inferred.
 
-```json
+```js
 const express = require("express")
 const app = express()
 const anystream = require("json-anystream")
