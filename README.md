@@ -16,20 +16,19 @@ This module is motivated by a need to read a set of JSON objects, which can be g
 
 ## Table of Contents
 
-- [json-anystream](#json-anystream)
-  - [Table of Contents](#table-of-contents)
-  - [Install](#install)
-  - [Usage](#usage)
-    - [Import](#import)
-    - [`anystream.make`](#anystreammake)
-    - [`anystream.convert`](#anystreamconvert)
-    - [`anystream.StreamAnyObject`](#anystreamstreamanyobject)
-    - [`anystream.addStream`](#anystreamaddstream)
-  - [Errors](#errors)
-  - [Maintainers](#maintainers)
-  - [Publish](#publish)
-  - [Contribute](#contribute)
-  - [License](#license)
+- [Table of Contents](#table-of-contents)
+- [Install](#install)
+- [Usage](#usage)
+  - [Import](#import)
+  - [`anystream.make`](#anystreammake)
+  - [`anystream.convert`](#anystreamconvert)
+  - [`anystream.StreamAnyObject`](#anystreamstreamanyobject)
+  - [`anystream.addStream`](#anystreamaddstream)
+- [Errors](#errors)
+- [Maintainers](#maintainers)
+- [Publish](#publish)
+- [Contribute](#contribute)
+- [License](#license)
 
 ## Install
 ```bash
@@ -166,4 +165,4 @@ PRs accepted. Please make sure the tests complete with your change. Add new test
 Small note: If editing the README, please conform to the [standard-readme](https://github.com/RichardLitt/standard-readme) specification.
 
 ## License
-MIT Copyright (c) 2020 Verbundzentrale des GBV (VZG)
+MIT Copyright (c) 2022 Verbundzentrale des GBV (VZG)
