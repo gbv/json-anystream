@@ -51,8 +51,9 @@ async function convert(stream, type, adjust) {
       // Handle multipart stream via busboy
       return await new Promise((resolve, reject) => {
         // Here we are assuming that "stream" refers to the request object
-        const busboy = new Busboy({ headers: stream.headers })
-        busboy.on("file", (fieldname, file, filename) => {
+        const busboy = Busboy({ headers: stream.headers })
+        busboy.on("file", (fieldname, file, info) => {
+          const { filename } = info
           // Only use fieldname `data`
           if (fieldname == "data") {
             if (filename.endsWith(".ndjson")) {
@@ -67,7 +68,7 @@ async function convert(stream, type, adjust) {
             file.resume()
           }
         })
-        busboy.on("finish", function () {
+        busboy.on("close", function () {
           reject(new errors.InvalidOrMissingDataFieldError("multipart/form-data requires a file in field `data`"))
         })
         stream.pipe(busboy)

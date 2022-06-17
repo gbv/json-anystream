@@ -84,6 +84,25 @@ describe("convert", () => {
 
   it("should fail for multipart request if data field is not given", async () => {
     const form = new FormData()
+    // Add some random data in a different field
+    form.append("notdata", Readable.from(""), {})
+    form.headers = form.getHeaders()
+    let stream
+    try {
+      stream = await convert(form, "multipart")
+    } catch (error) {
+      assert(error instanceof errors.InvalidOrMissingDataFieldError)
+      stream = null
+    }
+    stream && assert.fail("expected stream conversion to fail")
+  })
+
+  it("should fail for multipart request if data field contains filename that doesn't end on json/ndjson", async () => {
+    const form = new FormData()
+    // Add some random data in a different field
+    form.append("data", Readable.from("{}"), {
+      filename: "test.txt",
+    })
     form.headers = form.getHeaders()
     let stream
     try {
