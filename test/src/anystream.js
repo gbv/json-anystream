@@ -2,21 +2,25 @@
 
 // for multipart data tests, use https://www.npmjs.com/package/form-data
 
-const assert = require("assert")
+import assert from "node:assert"
 
-const { make, convert } = require("../../src/anystream")
+import { make, convert } from "../../src/anystream.js"
 
 // Use stream.Readable to create streams from JSON objects
-const { Readable } = require("stream")
+import { Readable } from "node:stream"
 
-const FormData = require("form-data")
-const nock = require("nock")
-const fs = require("fs")
-const errors = require("../../src/errors")
+import FormData from "form-data"
+import nock from "nock"
+import fs from "node:fs"
+import path from "node:path"
+import { fileURLToPath } from "node:url"
+import * as errors from "../../src/errors.js"
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 describe("convert", () => {
 
-  const tests = require("./test-cases.json")
+  const tests = JSON.parse(fs.readFileSync("./test/src/test-cases.json"))
   // Run all tests as normal stream/form-data as well as json/ndjson
   for (let multipart of [false, true]) {
     for (let ndjson of [false, true]) {

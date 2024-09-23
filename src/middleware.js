@@ -1,4 +1,4 @@
-const { make } = require("./anystream")
+import { make } from "./anystream.js"
 
 /**
  * Middleware for POST requests to add a `anystream` property to the request object.
@@ -18,7 +18,7 @@ const { make } = require("./anystream")
  * @param {*} res
  * @param {*} next
  */
-function addStream(...params) {
+export function addStream(...params) {
   let adjust
   if (params.length <= 1) {
     adjust = params[0]
@@ -56,8 +56,4 @@ function addStream(...params) {
       })
     }
   }
-}
-
-module.exports = {
-  addStream,
 }

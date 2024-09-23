@@ -1,7 +1,7 @@
-const { Transform } = require("stream")
-const errors = require("./errors")
+import { Transform } from "node:stream"
+import * as errors from "./errors.js"
 
-module.exports = class ObjectFilterTransform extends Transform {
+export default class ObjectFilterTransform extends Transform {
   constructor({ adjust, ...options } = {}) {
     options.objectMode = true
     super(options)

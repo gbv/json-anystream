@@ -1,8 +1,4 @@
-module.exports = Object.assign(
-  {
-    StreamAnyObject: require("./src/StreamAnyObject"),
-  },
-  require("./src/anystream"),
-  require("./src/middleware"),
-  require("./src/errors"),
-)
+export * from "./src/StreamAnyObject.js"
+export * from "./src/anystream.js"
+export * from "./src/middleware.js"
+export * from "./src/errors.js"

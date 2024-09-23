@@ -1,4 +1,5 @@
-const errors = require("./errors")
+import StreamBase from "stream-json/streamers/StreamBase.js"
+import * as errors from "./errors.js"
 
 /**
  * Streamer for stream-json that streams objects or arrays.
@@ -7,7 +8,7 @@ const errors = require("./errors")
  *
  * The code is basically combining StreamArray and StreamObject and adjusted to our needs.
  */
-module.exports = class StreamAnyObject extends require("stream-json/streamers/StreamBase") {
+export default class StreamAnyObject extends StreamBase {
 
   constructor({ adjust, ...options } = {}) {
     super(options)

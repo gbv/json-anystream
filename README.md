@@ -16,7 +16,6 @@ This module is motivated by a need to read a set of JSON objects, which can be g
 
 ## Table of Contents
 
-- [Table of Contents](#table-of-contents)
 - [Install](#install)
 - [Usage](#usage)
   - [Import](#import)
@@ -35,11 +34,13 @@ This module is motivated by a need to read a set of JSON objects, which can be g
 npm i json-anystream
 ```
 
+json-anystream v2.0+ requires Node.js 18 and is ES module only. For older versions or CommonJS, use v1.1.1.
+
 ## Usage
 
 ### Import
 ```js
-const anystream = require("json-anystream")
+import * as anystream from "json-anystream"
 ```
 
 ### `anystream.make`
@@ -85,7 +86,8 @@ Takes an existing stream and returns a JSON object stream. The `type` parameter 
 A custom streamer for [stream-json](https://www.npmjs.com/package/stream-json) that takes a stream of either a single JSON object or an array of JSON objects and transforms it into a stream that emits only JSON objects. I.e. if the input stream contains a single JSON object, that object is assembled and then emitted as a whole, if the input stream contains an array of JSON objects, the objects are emitted as direct JSON objects.
 
 ```js
-const { parser } = require("stream-json")
+import streamJson from "stream-json"
+const parser = streamJson.parser
 const pipeline = stream.pipe(parser()).pipe(new anystream.StreamAnyObject())
 pipeline.on("data", object => {
   // ...
@@ -113,9 +115,9 @@ A middleware for [express](https://www.npmjs.com/package/express) that provides 
 An additional query parameter `type`, containing one of "multipart", "json", or "ndjson", may be provided if the type can't be inferred.
 
 ```js
-const express = require("express")
+import express from "express"
 const app = express()
-const anystream = require("json-anystream")
+import * as anystream from "json-anystream"
 app.use((req, res, next) => {
   if (req.method == "POST") {
     // For POST requests, parse body with json-anystream middleware -> provides req.anystream property

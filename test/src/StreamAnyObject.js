@@ -1,13 +1,15 @@
-const assert = require("assert")
+import assert from "node:assert"
 
-const StreamAnyObject = require("../../src/StreamAnyObject")
-const { parser } = require("stream-json")
+import StreamAnyObject from "../../src/StreamAnyObject.js"
+import streamJson from "stream-json"
+const parser = streamJson.parser
 
 // Use stream.Readable to create streams from JSON objects
-const { Readable } = require("stream")
+import { Readable } from "node:stream"
 
-const tests = require("./test-cases.json")
-const errors = require("../../src/errors")
+import fs from "node:fs"
+const tests = JSON.parse(fs.readFileSync("./test/src/test-cases.json"))
+import * as errors from "../../src/errors.js"
 
 describe("StreamAnyObject", () => {
 

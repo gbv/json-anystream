@@ -1,14 +1,15 @@
-const Busboy = require("busboy")
-const ndjson = require("ndjson")
-const { parser } = require("stream-json")
-const StreamAnyObject = require("./StreamAnyObject")
-const ObjectFilterTransform = require("./ObjectFilterTransform")
-const errors = require("./errors")
+import Busboy from "busboy"
+import ndjson from "ndjson"
+import streamJson from "stream-json"
+const parser = streamJson.parser
+import StreamAnyObject from "./StreamAnyObject.js"
+import ObjectFilterTransform from "./ObjectFilterTransform.js"
+import * as errors from "./errors.js"
 // Used for reading files
-const fs = require("fs")
+import fs from "node:fs"
 // Used for consuming URLs
-const http = require("http")
-const https = require("https")
+import http from "node:http"
+import https from "node:https"
 
 /**
  * This is a workaround for the case that we only attach data handlers on the next tick, which would cause the stream to continue and we'd lose events.
@@ -45,7 +46,7 @@ function waitForNextHandler(originalStream, newStream) {
  * @param {string} type one of multipart, json, ndjson
  * @param {Function} adjust optional adjustment method through which all objects are adjusted
  */
-async function convert(stream, type, adjust) {
+export async function convert(stream, type, adjust) {
   switch (type) {
     case "multipart":
       // Handle multipart stream via busboy
@@ -91,7 +92,7 @@ async function convert(stream, type, adjust) {
  * @param {string} type optional type which is necessary for an input stream and might be necessary for URLs if they don't contain a file ending or content type
  * @param {Function} adjust optional adjustment method through which all objects are adjusted
  */
-async function make(input, type, adjust) {
+export async function make(input, type, adjust) {
   if (typeof input === "string") {
     if (input.endsWith(".json")) {
       type = type || "json"
@@ -129,9 +130,4 @@ async function make(input, type, adjust) {
   } else {
     return convert(input, type, adjust)
   }
-}
-
-module.exports = {
-  convert,
-  make,
 }
